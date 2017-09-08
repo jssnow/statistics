@@ -4,6 +4,7 @@
 // +----------------------------------------------------------------------
 namespace plugins\statistics;
 
+use app\user\model\UserModel;
 use cmf\lib\Plugin;
 use think\Db;
 
@@ -89,6 +90,40 @@ class StatisticsPlugin extends Plugin
         require_once "./plugins/statistics/jpgraph/jpgraph.php";
         require_once "./plugins/statistics/jpgraph/jpgraph_line.php";
         require_once "./plugins/statistics/jpgraph/jpgraph_bar.php";
+
+        //从数据库中获取一个月内每天的新注册用户的数量
+        //处理时间戳获取当月月份作为筛选条件
+        $month = date('Ym',time());
+        $prefix = config('database.prefix');
+        $res = Db::query("select FROM_UNIXTIME(create_time,'%Y%m%d') days,count(id) count from ".$prefix."user WHERE FROM_UNIXTIME(create_time,'%Y%m') = '".$month."' group by days");
+        dump($res);
+//        exit;
+        if(!empty($info)){
+
+        }else{
+            //TODO 最近七天没有数据
+        }
+        // x 轴数据，作为 x 轴标注
+        $j = date("t"); //获取当前月份天数
+        $start_time = strtotime(date('Y-m-01'));  //获取本月第一天时间戳
+        $xdata = array();
+        for($i=0;$i<$j;$i++){
+            $xdata[] = date('Y-m-d',$start_time+$i*86400); //每隔一天赋值给数组
+        }
+        //处理获取到的数据
+        $ydata = array();
+
+        for ($i=0;$i<33;$i++){
+            foreach ($res as $v){
+                if(intval(substr($v['days'],-1,2)) == $i){
+                    $ydata[$i] = $v['count'];
+                }else{
+                    $ydata[$i] = 0;
+                }
+            }
+        }
+        dump($ydata);
+        exit();
 
         //将要用于图表创建的数据存放在数组中
         $data = array(19,23,34,38,45,67,711,78,825,837,90,966);
