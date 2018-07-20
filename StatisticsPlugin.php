@@ -91,8 +91,9 @@ class StatisticsPlugin extends Plugin
                 $v = substr($v,-2);
             }
         }else{
-            foreach ($xdata as $k=>$v)
+            foreach ($xdata as $k=>&$v)
             {
+                $v = substr($v,-2);
                 $ydata[$k] = 0;
             }
         }
